@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,22 +25,22 @@ public class UserController {
 
     @GetMapping
     public List<User> getUsers() {
-        return userService.getUsers();
+        return ResponseEntity.ok().body(userService.getUsers()).getBody();
     }
 
     @GetMapping("/{userId}")
-    public User getUserById(@PathVariable(value = "userId", required = false) int userId) {
-        return userService.getUserById(userId);
+    public User getUserById(@PathVariable(value = "userId", required = false) Integer userId) {
+        return ResponseEntity.ok().body(userService.getUserById(userId)).getBody();
     }
 
     @PostMapping
     public User createNewUser(@Valid @RequestBody User user) {
-        return userService.createNewUser(user);
+        return ResponseEntity.ok().body(userService.createNewUser(user)).getBody();
     }
 
     @PatchMapping("/{userId}")
-    public User updateUser(@PathVariable(value = "userId") int userId, @RequestBody User user) {
-        return userService.updateUser(user, userId);
+    public User updateUser(@PathVariable(value = "userId") Integer userId, @RequestBody User user) {
+        return ResponseEntity.ok().body(userService.updateUser(user, userId)).getBody();
     }
 
     @DeleteMapping(value = {"", "/{userId}"})
@@ -50,6 +51,6 @@ public class UserController {
             throw new IllegalArgumentException("При удалении пользователя не был передан id");
         }
 
-        return userService.deleteUserById(userId.get());
+        return ResponseEntity.ok().body(userService.deleteUserById(userId.get())).getBody();
     }
 }

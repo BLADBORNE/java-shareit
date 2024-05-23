@@ -17,22 +17,27 @@ public class ItemServiceImpl implements ItemService {
     private final ItemStorage itemStorage;
     private final UserService userService;
 
+    @Override
     public Item createNewItem(Item item, int userId) {
         return itemStorage.createNewItem(item, userId);
     }
 
+    @Override
     public Item updateItem(Item item, int itemId, int userId) {
         return itemStorage.updateItem(item, itemId, userId);
     }
 
+    @Override
     public Item getItemById(int itemId, int userId) {
         return itemStorage.getItemById(itemId, userId);
     }
 
+    @Override
     public List<Item> getUsersItems(int userId) {
         return itemStorage.getUsersItems(userId);
     }
 
+    @Override
     public List<Item> getItemsForSearch(int userId, String search) {
         log.info("Получен запрос на отправление всех доступных вещей по условию: - {} от пользователя с id = {}",
                 search, userId);
