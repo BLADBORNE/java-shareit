@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -24,27 +25,27 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public List<User> getUsers() {
-        return ResponseEntity.ok().body(userService.getUsers()).getBody();
+    public List<UserDto> getUsers() {
+        return ResponseEntity.ok().body(userService.getUsersDto()).getBody();
     }
 
     @GetMapping("/{userId}")
-    public User getUserById(@PathVariable(value = "userId", required = false) Integer userId) {
-        return ResponseEntity.ok().body(userService.getUserById(userId)).getBody();
+    public UserDto getUserDtoById(@PathVariable(value = "userId", required = false) Integer userId) {
+        return ResponseEntity.ok().body(userService.getUserDtoById(userId)).getBody();
     }
 
     @PostMapping
-    public User createNewUser(@Valid @RequestBody User user) {
+    public UserDto createNewUser(@Valid @RequestBody User user) {
         return ResponseEntity.ok().body(userService.createNewUser(user)).getBody();
     }
 
     @PatchMapping("/{userId}")
-    public User updateUser(@PathVariable(value = "userId") Integer userId, @RequestBody User user) {
+    public UserDto updateUser(@PathVariable(value = "userId") Integer userId, @RequestBody User user) {
         return ResponseEntity.ok().body(userService.updateUser(user, userId)).getBody();
     }
 
     @DeleteMapping(value = {"", "/{userId}"})
-    public User deleteUserById(
+    public UserDto deleteUserById(
             @PathVariable(value = "userId", required = false) Optional<Integer> userId
     ) {
         if (userId.isEmpty()) {

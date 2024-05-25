@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.item.dao.ItemStorage;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -18,37 +19,37 @@ public class ItemServiceImpl implements ItemService {
     private final UserService userService;
 
     @Override
-    public Item createNewItem(Item item, int userId) {
+    public ItemDto createNewItem(Item item, int userId) {
         return itemStorage.createNewItem(item, userId);
     }
 
     @Override
-    public Item updateItem(Item item, int itemId, int userId) {
+    public ItemDto updateItem(Item item, int itemId, int userId) {
         return itemStorage.updateItem(item, itemId, userId);
     }
 
     @Override
-    public Item getItemById(int itemId, int userId) {
-        return itemStorage.getItemById(itemId, userId);
+    public ItemDto getItemDtoById(int itemId, int userId) {
+        return itemStorage.getItemDtoById(itemId, userId);
     }
 
     @Override
-    public List<Item> getUsersItems(int userId) {
-        return itemStorage.getUsersItems(userId);
+    public List<ItemDto> getUsersDtoItems(int userId) {
+        return itemStorage.getUsersItemsDto(userId);
     }
 
     @Override
-    public List<Item> getItemsForSearch(int userId, String search) {
+    public List<ItemDto> getItemsDtoForSearch(int userId, String search) {
         log.info("Получен запрос на отправление всех доступных вещей по условию: - {} от пользователя с id = {}",
                 search, userId);
 
-        userService.getUserById(userId);
+        userService.getUserDtoById(userId);
 
         if (search == null || search.isBlank()) {
             return List.of();
         }
 
-        return itemStorage.getAllItems().stream().filter(item -> (item.getName().toLowerCase()
+        return itemStorage.getAllItemsDto().stream().filter(item -> (item.getName().toLowerCase()
                 .contains(search.toLowerCase()) || item.getDescription().toLowerCase().contains(search
                 .toLowerCase())) && item.getAvailable()).collect(Collectors.toList());
     }

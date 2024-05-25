@@ -1,22 +1,31 @@
 package ru.practicum.shareit.user.dao;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.exception.AlreadyExistException;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class UserDao implements UserStorage {
+    private final UserMapper userMapper;
     private Map<Integer, User> users = new HashMap<>();
     private Map<Integer, String> usersEmails = new HashMap<>();
     private int generatedUserId = 0;
 
     @Override
-    public User createNewUser(User user) {
-        log.info("Получен запрос на создание пользовтаеля");
+    public UserDto createNewUser(User user) {
+        log.info("Получен запрос на создание пользователя");
 
         checkDuplicateEmailWhenCreateUser(user.getEmail());
 
@@ -27,11 +36,11 @@ public class UserDao implements UserStorage {
 
         log.info("Полтзователь с id = {} успешно создан", user.getId());
 
-        return user;
+        return userMapper.toUSerDto(user);
     }
 
     @Override
-    public User updateUser(User user, int userId) {
+    public UserDto updateUser(User user, int userId) {
         log.info("Получен запрос на обновление пользовтаеля с id = {}", userId);
 
         User curUser = getUserById(userId);
@@ -50,10 +59,43 @@ public class UserDao implements UserStorage {
 
         log.info("Пользователь с id = {} успешно обновлен", userId);
 
-        return curUser;
+        return userMapper.toUSerDto(curUser);
     }
 
     @Override
+    public UserDto getUserDtoById(int userId) {
+        User user = getUserById(userId);
+
+        return userMapper.toUSerDto(user);
+    }
+
+    @Override
+    public List<UserDto> getUsers() {
+        return users.values().stream().map(userMapper::toUSerDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public UserDto deleteUserById(int userId) {
+        log.info("Получен запрос на удаление пользователя с id = {}", userId);
+
+        User deletedUser = getUserById(userId);
+
+        users.remove(userId);
+        usersEmails.remove(userId);
+
+        log.info("Пользователь с id = {} был успешно удален", deletedUser.getId());
+
+        return userMapper.toUSerDto(deletedUser);
+    }
+
+    private void checkDuplicateEmailWhenCreateUser(String email) {
+        if (usersEmails.containsValue(email)) {
+            log.warn("Пользователь пытается использовать уже занятый email");
+
+            throw new AlreadyExistException(String.format("%s уже используется, выберите другой", email));
+        }
+    }
+
     public User getUserById(int userId) {
         log.info("Получен запрос на отправку пользователя с id = {}", userId);
 
@@ -68,34 +110,7 @@ public class UserDao implements UserStorage {
         throw new NoSuchElementException(String.format("Пользователь с id = %s отсутствует", userId));
     }
 
-    @Override
-    public List<User> getUsers() {
-        return new ArrayList<>(users.values());
-    }
-
-    @Override
-    public User deleteUserById(int userId) {
-        log.info("Получен запрос на удаление пользователя с id = {}", userId);
-
-        User deletedUser = getUserById(userId);
-
-        users.remove(userId);
-        usersEmails.remove(userId);
-
-        log.info("Пользователь с id = {} был успешно удален", deletedUser.getId());
-
-        return deletedUser;
-    }
-
-    private void checkDuplicateEmailWhenCreateUser(String email) {
-        if (usersEmails.containsValue(email)) {
-            log.warn("Пользователь пытается использовать уже занятый email");
-
-            throw new AlreadyExistException(String.format("%s уже используется, выберите другой", email));
-        }
-    }
-
-    private void getUserAndCheckDuplicateEmailWhenUpdateUser(User curUser, User user) {
+    public void getUserAndCheckDuplicateEmailWhenUpdateUser(User curUser, User user) {
         if (user.getEmail() == null) {
             return;
         }

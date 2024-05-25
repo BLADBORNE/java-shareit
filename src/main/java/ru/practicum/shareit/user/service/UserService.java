@@ -3,6 +3,7 @@ package ru.practicum.shareit.user.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.user.dao.UserStorage;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
@@ -12,23 +13,23 @@ import java.util.List;
 public class UserService {
     private final UserStorage userStorage;
 
-    public User createNewUser(User user) {
+    public UserDto createNewUser(User user) {
         return userStorage.createNewUser(user);
     }
 
-    public User updateUser(User user, int userId) {
+    public UserDto updateUser(User user, int userId) {
         return userStorage.updateUser(user, userId);
     }
 
-    public User getUserById(int userId) {
-        return userStorage.getUserById(userId);
+    public UserDto getUserDtoById(int userId) {
+        return userStorage.getUserDtoById(userId);
     }
 
-    public List<User> getUsers() {
+    public List<UserDto> getUsersDto() {
         return userStorage.getUsers();
     }
 
-    public User deleteUserById(int userId) {
+    public UserDto deleteUserById(int userId) {
         return userStorage.deleteUserById(userId);
     }
 }
