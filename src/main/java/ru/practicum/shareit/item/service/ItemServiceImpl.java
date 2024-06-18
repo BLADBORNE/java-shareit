@@ -3,54 +3,144 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.item.dao.ItemStorage;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.booking.model.ItemBooking;
+import ru.practicum.shareit.booking.service.ItemBookingService;
+import ru.practicum.shareit.comment.model.Comment;
+import ru.practicum.shareit.comment.service.CommentService;
+import ru.practicum.shareit.item.exception.PermissionException;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ItemServiceImpl implements ItemService {
-    private final ItemStorage itemStorage;
+    private final ItemRepository itemRepository;
     private final UserService userService;
+    private final ItemBookingService bookingService;
+    private final CommentService commentService;
 
     @Override
-    public ItemDto createNewItem(Item item, int userId) {
-        return itemStorage.createNewItem(item, userId);
+    public Item createNewItem(Item item, int userId) {
+        log.info("Полчуен запрос на создание вещи");
+
+        item.setOwner(userService.getUserById(userId));
+
+        return itemRepository.save(item);
     }
 
     @Override
-    public ItemDto updateItem(Item item, int itemId, int userId) {
-        return itemStorage.updateItem(item, itemId, userId);
+    public Item updateItem(Item item, int itemId, int userId) {
+        log.info("Полчуен запрос на обновление вещи с id = {} от пользователя с id = {}", itemId, userId);
+
+        Item curItem = getItemById(itemId, userId);
+
+        if (curItem.getOwner().getId().equals(userId)) {
+            if (item.getName() != null && !item.getName().equals(curItem.getName())) {
+                curItem.setName(item.getName());
+            }
+
+            if (item.getDescription() != null && !item.getDescription().equals(curItem.getDescription())) {
+                curItem.setDescription(item.getDescription());
+            }
+
+            if (item.getAvailable() != null && !item.getAvailable().equals(curItem.getAvailable())) {
+                curItem.setAvailable(item.getAvailable());
+            }
+
+            itemRepository.save(curItem);
+
+            return curItem;
+        }
+
+        log.warn("Не владелец пытаестя изменить объект");
+
+        throw new PermissionException("Доступ запрещен, изменять объект может только владелец");
     }
 
     @Override
-    public ItemDto getItemDtoById(int itemId, int userId) {
-        return itemStorage.getItemDtoById(itemId, userId);
+    public Item getItemById(int itemId, int userId) {
+        log.info("Получен запрос на получение вещи с id = {}", itemId);
+
+        userService.getUserById(userId);
+
+        Item item = itemContainsCheck(itemId);
+
+        addItemBookingForItem(item, userId);
+
+        addCommentsToItem(item);
+
+        return item;
     }
 
     @Override
-    public List<ItemDto> getUsersDtoItems(int userId) {
-        return itemStorage.getUsersItemsDto(userId);
+    public Item getItemByIdForBookingAndComment(int itemId) {
+        log.info("Получен запрос на получение вещи с id = {}", itemId);
+
+        return itemContainsCheck(itemId);
     }
 
     @Override
-    public List<ItemDto> getItemsDtoForSearch(int userId, String search) {
+    public List<Item> getUsersItems(int userId) {
+        log.info("Получен запрос на отправление всех вещей пользователю с id = {}", userId);
+
+        return itemRepository.findByOwnerIdEquals(userId).stream().peek(item -> {
+                    addItemBookingForItem(item, userId);
+                    addCommentsToItem(item);
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Item> getItemsForSearch(int userId, String search) {
         log.info("Получен запрос на отправление всех доступных вещей по условию: - {} от пользователя с id = {}",
                 search, userId);
 
-        userService.getUserDtoById(userId);
+        userService.getUserById(userId);
 
         if (search == null || search.isBlank()) {
             return List.of();
         }
 
-        return itemStorage.getAllItemsDto().stream().filter(item -> (item.getName().toLowerCase()
-                .contains(search.toLowerCase()) || item.getDescription().toLowerCase().contains(search
-                .toLowerCase())) && item.getAvailable()).collect(Collectors.toList());
+        return itemRepository.getUsersItemsForSearch(search);
+    }
+
+    private Item itemContainsCheck(int itemId) {
+        Optional<Item> item = itemRepository.findById(itemId);
+
+        if (item.isPresent()) {
+            return item.get();
+        }
+
+        log.warn("Отсутствует вещь с id = {}", itemId);
+
+        throw new NoSuchElementException(String.format("Отсутствует вещь с id = %d", itemId));
+    }
+
+    private void addItemBookingForItem(Item item, int userId) {
+        ItemBooking closestBooking = bookingService.getTheClosestBookingForItem(userId, item.getId());
+        ItemBooking futureBooking = bookingService.getFutureBookingForItem(userId, item.getId());
+
+        if (closestBooking != null) {
+            item.setLastBooking(closestBooking);
+        }
+
+        if (futureBooking != null) {
+            item.setNextBooking(futureBooking);
+        }
+    }
+
+    private void addCommentsToItem(Item item) {
+        List<Comment> comments = commentService.getItemComments(item.getId());
+
+        if (!comments.isEmpty()) {
+            item.setComments(comments);
+        }
     }
 }
