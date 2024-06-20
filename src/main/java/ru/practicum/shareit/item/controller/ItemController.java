@@ -4,6 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.comment.dto.CommentDto;
+import ru.practicum.shareit.comment.dto.CreationCommentDto;
+import ru.practicum.shareit.comment.mapper.CommentMapper;
+import ru.practicum.shareit.comment.service.CommentService;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
@@ -19,6 +23,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ItemController {
     private final ItemService itemService;
+    private final CommentService commentService;
 
     @PostMapping
     public ItemDto createNewItem(@RequestHeader("X-Sharer-User-Id") Integer userId, @Valid @RequestBody Item item) {
@@ -71,5 +76,18 @@ public class ItemController {
         log.info("Все доступные вещи по параметру отправлены клиенту");
 
         return ResponseEntity.ok().body(itemsDto).getBody();
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addCommentToItem(
+            @RequestHeader("X-Sharer-User-Id") Integer userId,
+            @PathVariable(value = "itemId") Integer itemId,
+            @Valid @RequestBody CreationCommentDto dto
+    ) {
+        CommentDto comment = CommentMapper.toCommentDto(commentService.addCommentToItem(userId, itemId, dto));
+
+        log.info("Пользователь с id = {} успешно добавил отзыв вещи с id = {}", userId, itemId);
+
+        return ResponseEntity.ok().body(comment).getBody();
     }
 }

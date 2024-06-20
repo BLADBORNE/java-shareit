@@ -1,13 +1,15 @@
 package ru.practicum.shareit.booking.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
+@Repository
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
     List<Booking> findByBookerIdOrderByStartDesc(int bookerId);
 
@@ -31,13 +33,11 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     List<Booking> findByItemOwnerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(int itemOwnerId, LocalDateTime start,
                                                                                  LocalDateTime end);
 
-    @Query(value = "SELECT * FROM bookings AS b WHERE b.item_id = ?1 AND b.start_date <= CURRENT_TIMESTAMP " +
-            "AND b.status = 'APPROVED' ORDER BY b.start_date DESC LIMIT 1", nativeQuery = true)
-    Booking getTheClosestBookingForItem(int itemId);
+    Optional<Booking> getFirstByItemIdAndStartIsLessThanEqualAndStatusEqualsOrderByStartDesc(int itemId, LocalDateTime now,
+                                                                              BookingStatus status);
 
-    @Query(value = "SELECT * FROM bookings AS b WHERE b.item_id = ?1 AND b.start_date > CURRENT_TIMESTAMP " +
-            "AND b.status = 'APPROVED' ORDER BY b.start_date LIMIT 1", nativeQuery = true)
-    Booking getFutureBookingForItem(int itemId);
+    Optional<Booking> getFirstByItemIdAndStartIsGreaterThanAndStatusEqualsOrderByStart(int itemId, LocalDateTime now,
+                                                                           BookingStatus status);
 
-    Booking getFirstByBookerIdAndItemIdAndEndIsBefore(int userId, int itemId, LocalDateTime now);
+    Optional<Booking> getFirstByBookerIdAndItemIdAndEndIsBefore(int userId, int itemId, LocalDateTime now);
 }

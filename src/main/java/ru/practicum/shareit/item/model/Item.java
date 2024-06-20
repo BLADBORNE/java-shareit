@@ -14,7 +14,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Column;
 import javax.persistence.ManyToOne;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
@@ -40,7 +39,7 @@ public class Item {
     @NotNull
     @Column(name = "is_available", nullable = false)
     private Boolean available;
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
     @Transient

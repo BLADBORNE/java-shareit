@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingCreationDto;
-import ru.practicum.shareit.booking.exception.ChangeStatusException;
-import ru.practicum.shareit.booking.exception.ItemUnavailableException;
-import ru.practicum.shareit.booking.exception.PermissionException;
-import ru.practicum.shareit.booking.exception.SelfReservationException;
+import ru.practicum.shareit.booking.exception.*;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
@@ -34,8 +31,13 @@ public class BookingServiceImpl implements BookingService {
     public Booking addBooking(BookingCreationDto booking, int userId) {
         log.info("Получен запрос на создание бронирования от пользователя с id = {} вещи с id = {}", userId,
                 booking.getItemId());
-
         User user = userService.getUserById(userId);
+
+        pastDateCheck(booking.getStart(), booking.getEnd());
+
+        endDateBeforeStartDateCheck(booking.getStart(), booking.getEnd());
+
+        ensDateIsEqualsStartDateCheck(booking.getStart(), booking.getEnd());
 
         Item item = itemService.getItemByIdForBookingAndComment(booking.getItemId());
 
@@ -105,82 +107,122 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getUserBookings(int userId, BookingStatus state) {
+    public List<Booking> getUserBookings(int userId, String status) {
+        BookingStatus state = status == null ? BookingStatus.ALL : convertToBookingStatusCheck(status);
+
         List<Booking> bookings;
 
-        if (BookingStatus.ALL.equals(state)) {
-            log.info("Получен запрос на отправку всех бронирований пользовтелю с id = {}", userId);
+        switch (state) {
+            case ALL:
+                log.info("Получен запрос на отправку всех бронирований пользовтелю с id = {}", userId);
 
-            userService.getUserById(userId);
+                userService.getUserById(userId);
 
-            bookings = bookingRepository.findByBookerIdOrderByStartDesc(userId);
-        } else if (BookingStatus.FUTURE.equals(state)) {
-            log.info("Получен запрос на отправку всех будущих бронирований пользователю с id = {}", userId);
+                bookings = bookingRepository.findByBookerIdOrderByStartDesc(userId);
+                break;
+            case FUTURE:
+                log.info("Получен запрос на отправку всех будущих бронирований пользователю с id = {}", userId);
 
-            userService.getUserById(userId);
+                userService.getUserById(userId);
 
-            bookings = bookingRepository.findByBookerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now());
-        } else if (BookingStatus.PAST.equals(state)) {
-            log.info("Получен запрос на отправку всех прошлых бронирований пользователю с id = {}", userId);
+                bookings = bookingRepository.findByBookerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now());
+                break;
+            case PAST:
+                log.info("Получен запрос на отправку всех прошлых бронирований пользователю с id = {}", userId);
 
-            userService.getUserById(userId);
+                userService.getUserById(userId);
 
-            bookings = bookingRepository.findByBookerIdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now());
-        } else if (BookingStatus.CURRENT.equals(state)) {
-            log.info("Получен запрос на отправку всех текущих бронирований пользователю с id = {}", userId);
+                bookings = bookingRepository.findByBookerIdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now());
+                break;
+            case CURRENT:
+                log.info("Получен запрос на отправку всех текущих бронирований пользователю с id = {}", userId);
 
-            userService.getUserById(userId);
+                userService.getUserById(userId);
 
-            bookings = bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(userId,
-                    LocalDateTime.now(), LocalDateTime.now());
-        } else {
-            log.info("Получен запрос на отправку всех бронирований пользовтелю с id = {} с параметром {}", userId, state);
+                bookings = bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(userId,
+                        LocalDateTime.now(), LocalDateTime.now());
+                break;
+            default:
+                log.info("Получен запрос на отправку всех бронирований пользовтелю с id = {} с параметром {}", userId, state);
 
-            userService.getUserById(userId);
+                userService.getUserById(userId);
 
-            bookings = bookingRepository.findByBookerIdAndStatusEqualsOrderByStartDesc(userId, state);
+                bookings = bookingRepository.findByBookerIdAndStatusEqualsOrderByStartDesc(userId, state);
         }
 
         return bookings;
     }
 
     @Override
-    public List<Booking> getOwnerBookings(int userId, BookingStatus state) {
+    public List<Booking> getOwnerBookings(int userId, String status) {
+        BookingStatus state = status == null ? BookingStatus.ALL : convertToBookingStatusCheck(status);
+
         List<Booking> bookings;
 
-        if (BookingStatus.ALL.equals(state)) {
-            log.info("Получен запрос на отправку всех бронирований создателю с id = {}", userId);
+        switch (state) {
+            case ALL:
+                log.info("Получен запрос на отправку всех бронирований создателю с id = {}", userId);
 
-            userService.getUserById(userId);
+                userService.getUserById(userId);
 
-            bookings = bookingRepository.findByItemOwnerIdOrderByStartDesc(userId);
-        } else if (BookingStatus.FUTURE.equals(state)) {
-            log.info("Получен запрос на отправку всех будущих бронирований создателю с id = {}", userId);
+                bookings = bookingRepository.findByItemOwnerIdOrderByStartDesc(userId);
+                break;
+            case FUTURE:
+                log.info("Получен запрос на отправку всех будущих бронирований создателю с id = {}", userId);
 
-            userService.getUserById(userId);
+                userService.getUserById(userId);
 
-            bookings = bookingRepository.findByItemOwnerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now());
-        } else if (BookingStatus.PAST.equals(state)) {
-            log.info("Получен запрос на отправку всех прошлых бронирований создателю с id = {}", userId);
+                bookings = bookingRepository.findByItemOwnerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now());
+                break;
+            case PAST:
+                log.info("Получен запрос на отправку всех прошлых бронирований создателю с id = {}", userId);
 
-            userService.getUserById(userId);
+                userService.getUserById(userId);
 
-            bookings = bookingRepository.findByItemOwnerIdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now());
-        } else if (BookingStatus.CURRENT.equals(state)) {
-            log.info("Получен запрос на отправку всех текущих бронирований создателю с id = {}", userId);
+                bookings = bookingRepository.findByItemOwnerIdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now());
+                break;
+            case CURRENT:
+                log.info("Получен запрос на отправку всех текущих бронирований создателю с id = {}", userId);
 
-            userService.getUserById(userId);
+                userService.getUserById(userId);
 
-            bookings = bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(userId,
-                    LocalDateTime.now(), LocalDateTime.now());
-        } else {
-            log.info("Получен запрос на отправку всех бронирований создателю с id = {} с параметром {}", userId, state);
+                bookings = bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(userId,
+                        LocalDateTime.now(), LocalDateTime.now());
+                break;
+            default:
+                log.info("Получен запрос на отправку всех бронирований создателю с id = {} с параметром {}", userId, state);
 
-            userService.getUserById(userId);
+                userService.getUserById(userId);
 
-            bookings = bookingRepository.findByItemOwnerIdAndStatusEqualsOrderByStartDesc(userId, state);
+                bookings = bookingRepository.findByItemOwnerIdAndStatusEqualsOrderByStartDesc(userId, state);
         }
 
         return bookings;
+    }
+
+    private void pastDateCheck(LocalDateTime start, LocalDateTime end) {
+        if (start.isBefore(LocalDateTime.now()) || end.isBefore(LocalDateTime.now())) {
+            throw new DateFromThePastException("Начало или конец бронирования не могут быть в прошлом");
+        }
+    }
+
+    private void endDateBeforeStartDateCheck(LocalDateTime start, LocalDateTime end) {
+        if (end.isBefore(start)) {
+            throw new EndDateIsBeforeStartDateException("Бронирование не может закончиться раньше, чем началось");
+        }
+    }
+
+    private void ensDateIsEqualsStartDateCheck(LocalDateTime start, LocalDateTime end) {
+        if (end.isEqual(start)) {
+            throw new EndDateIsEqualsStartDateException("Бронирование не может начаться и закончиться в одно и тоже время");
+        }
+    }
+
+    private BookingStatus convertToBookingStatusCheck(String status) {
+        try {
+            return BookingStatus.valueOf(status);
+        } catch (IllegalArgumentException e) {
+            throw new UnsupportedBookingStatusException("Unknown state: UNSUPPORTED_STATUS");
+        }
     }
 }
