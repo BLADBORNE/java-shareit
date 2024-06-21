@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.practicum.shareit.user.model.User;
 
+import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
 @Getter
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ItemRequest {
     private Integer id;
+    @NotBlank
     private String description;
     private User requestor;
     private LocalDateTime created;
