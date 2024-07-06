@@ -7,9 +7,14 @@ import ru.practicum.shareit.booking.model.ItemBooking;
 import ru.practicum.shareit.booking.service.ItemBookingService;
 import ru.practicum.shareit.comment.model.Comment;
 import ru.practicum.shareit.comment.service.CommentService;
+import ru.practicum.shareit.item.dto.ItemCreationDto;
 import ru.practicum.shareit.item.exception.PermissionException;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.util.List;
@@ -25,14 +30,28 @@ public class ItemServiceImpl implements ItemService {
     private final UserService userService;
     private final ItemBookingService bookingService;
     private final CommentService commentService;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Override
-    public Item createNewItem(Item item, int userId) {
+    public Item createNewItem(ItemCreationDto item, int userId) {
         log.info("Полчуен запрос на создание вещи");
 
-        item.setOwner(userService.getUserById(userId));
+        User user = userService.getUserById(userId);
 
-        return itemRepository.save(item);
+        if (item.getRequestId() != null) {
+
+            Optional<ItemRequest> itemRequest = itemRequestRepository.findById(item.getRequestId());
+
+            if (itemRequest.isPresent()) {
+                return itemRepository.save(ItemMapper.toItemWithRequest(item, user, itemRequest.get()));
+            }
+
+            log.info("Запрос с id = {} не найден", item.getRequestId());
+
+            throw new NoSuchElementException("Запрос не найден");
+        }
+
+        return itemRepository.save(ItemMapper.toItemWithoutRequest(item, user));
     }
 
     @Override
@@ -90,7 +109,9 @@ public class ItemServiceImpl implements ItemService {
     public List<Item> getUsersItems(int userId) {
         log.info("Получен запрос на отправление всех вещей пользователю с id = {}", userId);
 
-        return itemRepository.findByOwnerIdEquals(userId).stream().peek(item -> {
+        userService.getUserById(userId);
+
+        return itemRepository.findByOwnerId(userId).stream().peek(item -> {
                     addItemBookingForItem(item, userId);
                     addCommentsToItem(item);
                 })
@@ -134,6 +155,13 @@ public class ItemServiceImpl implements ItemService {
         if (futureBooking != null) {
             item.setNextBooking(futureBooking);
         }
+    }
+
+    @Override
+    public List<Item> findByRequestIdIn(List<Integer> requestsId) {
+        log.info("Получен запос на отправку всех вещей, созданных по запросам");
+
+        return itemRepository.findByRequestIdIn(requestsId);
     }
 
     private void addCommentsToItem(Item item) {

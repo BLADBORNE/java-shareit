@@ -3,11 +3,11 @@ package ru.practicum.shareit.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.exception.AlreadyExistException;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -15,10 +15,10 @@ import java.util.List;
 public class DuplicateFinder {
     private final UserRepository userRepository;
 
-    public void checkDuplicateEmailsWhenCreate(String email) {
-        List<User> emailsRepeat = userRepository.findByEmailEquals(email);
+    private void checkDuplicateEmails(String email) {
+        Optional<User> emailsRepeat = userRepository.findByEmailEquals(email);
 
-        if (!emailsRepeat.isEmpty()) {
+        if (emailsRepeat.isPresent()) {
             log.warn("Пользователь пытается использовать уже занятый email");
 
             throw new AlreadyExistException(String.format("%s уже используется, выберите другой", email));
@@ -34,6 +34,6 @@ public class DuplicateFinder {
             return;
         }
 
-        checkDuplicateEmailsWhenCreate(updatedUser.getEmail());
+        checkDuplicateEmails(updatedUser.getEmail());
     }
 }

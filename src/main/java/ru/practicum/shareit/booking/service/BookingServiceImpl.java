@@ -2,6 +2,9 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingCreationDto;
 import ru.practicum.shareit.booking.exception.*;
@@ -26,11 +29,13 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final UserService userService;
     private final ItemService itemService;
+    private final Sort sort = Sort.by("start").descending();
 
     @Override
     public Booking addBooking(BookingCreationDto booking, int userId) {
         log.info("Получен запрос на создание бронирования от пользователя с id = {} вещи с id = {}", userId,
                 booking.getItemId());
+
         User user = userService.getUserById(userId);
 
         pastDateCheck(booking.getStart(), booking.getEnd());
@@ -107,10 +112,12 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getUserBookings(int userId, String status) {
+    public List<Booking> getUserBookings(int userId, String status, int from, int size) {
         BookingStatus state = status == null ? BookingStatus.ALL : convertToBookingStatusCheck(status);
 
         List<Booking> bookings;
+
+        Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size, sort);
 
         switch (state) {
             case ALL:
@@ -118,21 +125,23 @@ public class BookingServiceImpl implements BookingService {
 
                 userService.getUserById(userId);
 
-                bookings = bookingRepository.findByBookerIdOrderByStartDesc(userId);
+                bookings = bookingRepository.findByBookerIdOrderByStartDesc(userId, pageable).toList();
                 break;
             case FUTURE:
                 log.info("Получен запрос на отправку всех будущих бронирований пользователю с id = {}", userId);
 
                 userService.getUserById(userId);
 
-                bookings = bookingRepository.findByBookerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now());
+                bookings = bookingRepository.findByBookerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now(),
+                        pageable).toList();
                 break;
             case PAST:
                 log.info("Получен запрос на отправку всех прошлых бронирований пользователю с id = {}", userId);
 
                 userService.getUserById(userId);
 
-                bookings = bookingRepository.findByBookerIdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now());
+                bookings = bookingRepository.findByBookerIdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now(),
+                        pageable).toList();
                 break;
             case CURRENT:
                 log.info("Получен запрос на отправку всех текущих бронирований пользователю с id = {}", userId);
@@ -140,24 +149,27 @@ public class BookingServiceImpl implements BookingService {
                 userService.getUserById(userId);
 
                 bookings = bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(userId,
-                        LocalDateTime.now(), LocalDateTime.now());
+                        LocalDateTime.now(), LocalDateTime.now(), pageable).toList();
                 break;
             default:
                 log.info("Получен запрос на отправку всех бронирований пользовтелю с id = {} с параметром {}", userId, state);
 
                 userService.getUserById(userId);
 
-                bookings = bookingRepository.findByBookerIdAndStatusEqualsOrderByStartDesc(userId, state);
+                bookings = bookingRepository.findByBookerIdAndStatusEqualsOrderByStartDesc(userId, state, pageable)
+                        .toList();
         }
 
         return bookings;
     }
 
     @Override
-    public List<Booking> getOwnerBookings(int userId, String status) {
+    public List<Booking> getOwnerBookings(int userId, String status, int from, int size) {
         BookingStatus state = status == null ? BookingStatus.ALL : convertToBookingStatusCheck(status);
 
         List<Booking> bookings;
+
+        Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size, sort);
 
         switch (state) {
             case ALL:
@@ -165,21 +177,23 @@ public class BookingServiceImpl implements BookingService {
 
                 userService.getUserById(userId);
 
-                bookings = bookingRepository.findByItemOwnerIdOrderByStartDesc(userId);
+                bookings = bookingRepository.findByItemOwnerIdOrderByStartDesc(userId, pageable).toList();
                 break;
             case FUTURE:
                 log.info("Получен запрос на отправку всех будущих бронирований создателю с id = {}", userId);
 
                 userService.getUserById(userId);
 
-                bookings = bookingRepository.findByItemOwnerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now());
+                bookings = bookingRepository.findByItemOwnerIdAndStartIsAfterOrderByStartDesc(userId, LocalDateTime.now(),
+                        pageable).toList();
                 break;
             case PAST:
                 log.info("Получен запрос на отправку всех прошлых бронирований создателю с id = {}", userId);
 
                 userService.getUserById(userId);
 
-                bookings = bookingRepository.findByItemOwnerIdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now());
+                bookings = bookingRepository.findByItemOwnerIdAndEndIsBeforeOrderByStartDesc(userId, LocalDateTime.now(),
+                        pageable).toList();
                 break;
             case CURRENT:
                 log.info("Получен запрос на отправку всех текущих бронирований создателю с id = {}", userId);
@@ -187,14 +201,15 @@ public class BookingServiceImpl implements BookingService {
                 userService.getUserById(userId);
 
                 bookings = bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(userId,
-                        LocalDateTime.now(), LocalDateTime.now());
+                        LocalDateTime.now(), LocalDateTime.now(), pageable).toList();
                 break;
             default:
                 log.info("Получен запрос на отправку всех бронирований создателю с id = {} с параметром {}", userId, state);
 
                 userService.getUserById(userId);
 
-                bookings = bookingRepository.findByItemOwnerIdAndStatusEqualsOrderByStartDesc(userId, state);
+                bookings = bookingRepository.findByItemOwnerIdAndStatusEqualsOrderByStartDesc(userId, state, pageable)
+                        .toList();
         }
 
         return bookings;

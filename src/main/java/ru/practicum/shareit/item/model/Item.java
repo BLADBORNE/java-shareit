@@ -1,10 +1,13 @@
 package ru.practicum.shareit.item.model;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import ru.practicum.shareit.booking.model.ItemBooking;
 import ru.practicum.shareit.comment.model.Comment;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.Table;
@@ -24,7 +27,9 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
+@Builder
 @Table(name = "items")
 public class Item {
     @Id
@@ -48,5 +53,7 @@ public class Item {
     private ItemBooking nextBooking;
     @Transient
     private List<Comment> comments = new ArrayList<>();
-    // private ItemRequest request;
+    @ManyToOne
+    @JoinColumn(name = "request_id")
+    private ItemRequest request;
 }

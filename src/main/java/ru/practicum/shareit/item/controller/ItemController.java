@@ -8,6 +8,7 @@ import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.dto.CreationCommentDto;
 import ru.practicum.shareit.comment.mapper.CommentMapper;
 import ru.practicum.shareit.comment.service.CommentService;
+import ru.practicum.shareit.item.dto.ItemCreationDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
@@ -26,10 +27,12 @@ public class ItemController {
     private final CommentService commentService;
 
     @PostMapping
-    public ItemDto createNewItem(@RequestHeader("X-Sharer-User-Id") Integer userId, @Valid @RequestBody Item item) {
+    public ItemDto createNewItem(@RequestHeader("X-Sharer-User-Id") Integer userId,
+                                 @Valid @RequestBody ItemCreationDto item
+    ) {
         ItemDto createdItem = ItemMapper.toItemDto(itemService.createNewItem(item, userId));
 
-        log.info("Вещь с id = {} успешно создана", item.getId());
+        log.info("Вещь с id = {} успешно создана", createdItem.getId());
 
         return ResponseEntity.ok().body(createdItem).getBody();
     }
