@@ -15,8 +15,4 @@ public interface BookingService {
     List<Booking> getUserBookings(int userId, String status, int from, int size);
 
     List<Booking> getOwnerBookings(int userId, String status, int from, int size);
-
-   // List<Booking> getUserPageableBookings(int userId, int from, int size);
-
-    //List<Booking> getOwnerPageableBookings(int userId, int from, int size);
 }

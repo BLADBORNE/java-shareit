@@ -31,7 +31,6 @@ import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
-
 public class CommentServiceTest {
     @Mock
     private UserService userService;

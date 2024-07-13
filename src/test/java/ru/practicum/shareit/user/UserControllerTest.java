@@ -39,7 +39,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc
 public class UserControllerTest {
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -51,7 +50,6 @@ public class UserControllerTest {
 
     private User user;
     private UserDto userDto;
-    private final String headerUserId = "X-Sharer-User-Id";
 
     @BeforeEach
     public void createUser() {

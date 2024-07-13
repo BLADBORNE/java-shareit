@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.booking.service.ItemBookingService;
 import ru.practicum.shareit.comment.service.CommentService;
 import ru.practicum.shareit.item.dto.ItemCreationDto;
+import ru.practicum.shareit.item.exception.PermissionException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
@@ -149,6 +150,21 @@ public class ItemServiceTest {
         assertThat(getUpdatedItem.getName(), is(updatedItem.getName()));
         assertThat(getUpdatedItem.getDescription(), is(updatedItem.getDescription()));
         assertThat(getUpdatedItem.getAvailable(), is(false));
+    }
+
+    @Test
+    public void shouldThrownPermissionExceptionWhenUpdateItem() {
+        Item updatedItem = Item.builder()
+                .id(23)
+                .name("Дрель23")
+                .description("Очень красивая дрель")
+                .available(false)
+                .owner(user)
+                .build();
+
+        when(itemRepository.findById(anyInt())).thenReturn(Optional.of(item));
+
+        assertThrows(PermissionException.class, () -> itemService.updateItem(updatedItem, 1, anyInt()));
     }
 
     @Test

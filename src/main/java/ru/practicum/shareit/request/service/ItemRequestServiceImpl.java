@@ -73,7 +73,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         return setItemsForItemRequest(itemRequestRepository.findByRequestorIdNot(userId, PageRequest
                 .of(from > 0 ? from / size : 0, size, Sort.by("created").descending())).toList());
-
     }
 
     private List<ItemRequest> setItemsForItemRequest(List<ItemRequest> itemRequests) {
