@@ -10,12 +10,13 @@ import ru.practicum.shareit.booking.exception.CommentNotAllowedException;
 import ru.practicum.shareit.item.exception.PermissionException;
 import ru.practicum.shareit.item.model.ErrorResponse;
 
+import javax.validation.ConstraintViolationException;
 import java.util.NoSuchElementException;
 
 @RestControllerAdvice(value = "ru.practicum.shareit.item.controller")
 public class ItemErrorController {
     @ExceptionHandler({MethodArgumentNotValidException.class, PermissionException.class,
-            CommentNotAllowedException.class, MissingRequestHeaderException.class})
+            CommentNotAllowedException.class, MissingRequestHeaderException.class, ConstraintViolationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleException(final Exception e) {
         return new ErrorResponse(e.getMessage());

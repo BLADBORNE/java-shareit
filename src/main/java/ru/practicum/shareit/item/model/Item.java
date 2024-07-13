@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import ru.practicum.shareit.booking.model.ItemBooking;
 import ru.practicum.shareit.comment.model.Comment;
+import ru.practicum.shareit.item.constraint.CreatedItem;
+import ru.practicum.shareit.item.constraint.UpdatedItem;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
@@ -21,6 +23,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,13 +38,15 @@ public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @NotBlank
+    @NotBlank(groups = CreatedItem.class)
+    @Pattern(regexp = ".*[^ ].*",groups = UpdatedItem.class)
     @Column(name = "name", nullable = false)
     private String name;
-    @NotBlank
+    @NotBlank(groups = CreatedItem.class)
+    @Pattern(regexp = ".*[^ ].*",groups = UpdatedItem.class)
     @Column(name = "description", nullable = false)
     private String description;
-    @NotNull
+    @NotNull(groups = CreatedItem.class)
     @Column(name = "is_available", nullable = false)
     private Boolean available;
     @ManyToOne
