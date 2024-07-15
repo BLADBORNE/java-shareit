@@ -1,4 +1,4 @@
-package ru.practicum.shareit.comment.dto;
+package ru.practicum.shareit.request.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,7 +13,7 @@ import javax.validation.constraints.NotBlank;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CreationCommentDto {
+public class ItemRequestCreationDto {
     @NotBlank
-    String text;
+    private String description;
 }

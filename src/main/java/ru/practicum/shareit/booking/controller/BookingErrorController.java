@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -15,7 +16,7 @@ public class BookingErrorController {
     @ExceptionHandler({MethodArgumentNotValidException.class, DateFromThePastException.class,
             ItemUnavailableException.class, EndDateIsBeforeStartDateException.class,
             EndDateIsEqualsStartDateException.class, UnsupportedBookingStatusException.class,
-            ChangeStatusException.class})
+            ChangeStatusException.class, MissingRequestHeaderException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleException(final Exception e) {
         return new ErrorResponse(e.getMessage());

@@ -8,12 +8,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.user.model.ErrorResponse;
 import ru.practicum.shareit.user.exception.AlreadyExistException;
 
+import javax.validation.ConstraintViolationException;
 import java.util.NoSuchElementException;
 
 
 @RestControllerAdvice(value = "ru.practicum.shareit.user.controller")
 public class UserErrorController {
-    @ExceptionHandler({MethodArgumentNotValidException.class})
+    @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleException(final Exception e) {
         return new ErrorResponse(e.getMessage());

@@ -1,5 +1,13 @@
 DROP TABLE IF EXISTS
-    users;
+    users CASCADE;
+DROP TABLE IF EXISTS
+    items_requests CASCADE;
+DROP TABLE IF EXISTS
+    items CASCADE;
+DROP TABLE IF EXISTS
+    bookings CASCADE;
+DROP TABLE IF EXISTS
+    comments CASCADE;
 
 CREATE TABLE IF NOT EXISTS users
 (
@@ -22,8 +30,8 @@ CREATE TABLE IF NOT EXISTS items
     name         VARCHAR(255) NOT NULL CHECK (name <> ''),
     description  VARCHAR(512) NOT NULL CHECK (name <> ''),
     is_available BOOLEAN      NOT NULL,
-    owner_id     INTEGER      NOT NULL REFERENCES users (id) ON DELETE CASCADE
-    -- request_id   INTEGER      NOT NULL REFERENCES items_requests (id) ON DELETE CASCADE
+    owner_id     INTEGER      NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    request_id   INTEGER REFERENCES items_requests (id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS bookings

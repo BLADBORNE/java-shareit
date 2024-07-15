@@ -3,11 +3,23 @@ package ru.practicum.shareit.item.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.dto.CreationCommentDto;
 import ru.practicum.shareit.comment.mapper.CommentMapper;
 import ru.practicum.shareit.comment.service.CommentService;
+import ru.practicum.shareit.item.constraint.CreatedItem;
+import ru.practicum.shareit.item.constraint.UpdatedItem;
+import ru.practicum.shareit.item.dto.ItemCreationDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
@@ -21,23 +33,28 @@ import java.util.stream.Collectors;
 @RequestMapping("/items")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class ItemController {
     private final ItemService itemService;
     private final CommentService commentService;
 
+    @Validated(value = CreatedItem.class)
     @PostMapping
-    public ItemDto createNewItem(@RequestHeader("X-Sharer-User-Id") Integer userId, @Valid @RequestBody Item item) {
+    public ItemDto createNewItem(@RequestHeader("X-Sharer-User-Id") Integer userId,
+                                 @Valid @RequestBody ItemCreationDto item
+    ) {
         ItemDto createdItem = ItemMapper.toItemDto(itemService.createNewItem(item, userId));
 
-        log.info("Вещь с id = {} успешно создана", item.getId());
+        log.info("Вещь с id = {} успешно создана", createdItem.getId());
 
         return ResponseEntity.ok().body(createdItem).getBody();
     }
 
+    @Validated(value = UpdatedItem.class)
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(
             @RequestHeader("X-Sharer-User-Id") Integer userId,
-            @RequestBody Item item,
+            @Valid @RequestBody Item item,
             @PathVariable(value = "itemId") Integer itemId
     ) {
         ItemDto updatedItem = ItemMapper.toItemDto(itemService.updateItem(item, itemId, userId));

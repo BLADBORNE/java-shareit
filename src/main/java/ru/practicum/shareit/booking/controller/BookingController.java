@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +19,8 @@ import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,6 +28,7 @@ import java.util.stream.Collectors;
 @RequestMapping(path = "/bookings")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class BookingController {
     private final BookingService bookingService;
 
@@ -68,11 +72,13 @@ public class BookingController {
     }
 
     @GetMapping
-    public List<BookingDto> getUserDtoBookings(
+    public List<BookingDto> getUserBookings(
             @RequestHeader("X-Sharer-User-Id") Integer userId,
-            @RequestParam(value = "state", required = false) String status
+            @RequestParam(value = "state", required = false) String status,
+            @RequestParam(value = "from", required = false, defaultValue = "0") @PositiveOrZero Integer from,
+            @RequestParam(value = "size", required = false, defaultValue = "10") @Positive Integer size
     ) {
-        List<BookingDto> bookingDtoList = bookingService.getUserBookings(userId, status).stream()
+        List<BookingDto> bookingDtoList = bookingService.getUserBookings(userId, status, from, size).stream()
                 .map(BookingMapper::toBookingDto).collect(Collectors.toList());
 
         log.info("Успешно отправлены все будущие бронирования пользователю с id = {}", userId);
@@ -83,9 +89,11 @@ public class BookingController {
     @GetMapping("/owner")
     public List<BookingDto> getOwnerBookings(
             @RequestHeader("X-Sharer-User-Id") Integer userId,
-            @RequestParam(value = "state", required = false) String status
+            @RequestParam(value = "state", required = false) String status,
+            @RequestParam(value = "from", required = false, defaultValue = "0") @PositiveOrZero Integer from,
+            @RequestParam(value = "size", required = false, defaultValue = "10") @Positive Integer size
     ) {
-        List<BookingDto> bookingDtoList = bookingService.getOwnerBookings(userId, status).stream()
+        List<BookingDto> bookingDtoList = bookingService.getOwnerBookings(userId, status, from, size).stream()
                 .map(BookingMapper::toBookingDto).collect(Collectors.toList());
 
         log.info("Успешно отправлены бронирования создателю с id = {}", userId);
