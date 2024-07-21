@@ -83,7 +83,7 @@ public class BookingController {
 
         log.info("Успешно отправлены все будущие бронирования пользователю с id = {}", userId);
 
-        return ResponseEntity.ok(bookingDtoList).getBody();
+        return ResponseEntity.ok().body(bookingDtoList).getBody();
     }
 
     @GetMapping("/owner")
