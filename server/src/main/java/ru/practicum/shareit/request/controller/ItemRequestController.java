@@ -3,7 +3,6 @@ package ru.practicum.shareit.request.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,9 +17,6 @@ import ru.practicum.shareit.request.dto.ResponseItemRequestCreationDto;
 import ru.practicum.shareit.request.mapper.ItemRequestMapper;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,14 +24,13 @@ import java.util.stream.Collectors;
 @RequestMapping(path = "/requests")
 @RequiredArgsConstructor
 @Slf4j
-@Validated
 public class ItemRequestController {
     private final ItemRequestService itemRequestService;
 
     @PostMapping
     public ResponseItemRequestCreationDto createItemRequest(
             @RequestHeader("X-Sharer-User-Id") Integer userId,
-            @Valid @RequestBody ItemRequestCreationDto itemRequestCreationDto
+            @RequestBody ItemRequestCreationDto itemRequestCreationDto
     ) {
         ResponseItemRequestCreationDto response = ItemRequestMapper.responseItemRequestCreationDto(itemRequestService
                 .addItemRequest(itemRequestCreationDto, userId));
@@ -73,8 +68,8 @@ public class ItemRequestController {
     @GetMapping("/all")
     public List<ItemRequestDto> getAllItemRequests(
             @RequestHeader("X-Sharer-User-Id") Integer userId,
-            @RequestParam(value = "from", required = false, defaultValue = "0") @PositiveOrZero Integer from,
-            @RequestParam(value = "size", required = false, defaultValue = "10") @Positive Integer size
+            @RequestParam(value = "from") Integer from,
+            @RequestParam(value = "size") Integer size
     ) {
         List<ItemRequestDto> dtos = itemRequestService.getAllItemRequests(userId, from, size).stream()
                 .map(ItemRequestMapper::toItemRequestDto).collect(Collectors.toList());

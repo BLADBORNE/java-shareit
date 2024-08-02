@@ -12,7 +12,7 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
     @Query(value = "SELECT * FROM items AS items WHERE items.is_available = TRUE AND (items.name ILIKE %?1% OR items.description ILIKE %?1%)", nativeQuery = true)
     List<Item> getUsersItemsForSearch(String search);
 
-    List<Item> findByOwnerId(int id);
+    List<Item> findByOwnerIdOrderById(int id);
 
     List<Item> findByRequestIdIn(List<Integer> requestsId);
 }

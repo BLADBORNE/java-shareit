@@ -104,24 +104,6 @@ public class BookingControllerTest {
     }
 
     @Test
-    public void shouldThrownExceptionWhenCreatedBookingIsNotValid() throws Exception {
-        BookingCreationDto creationDto = BookingCreationDto.builder()
-                .itemId(null)
-                .start(LocalDateTime.now().plusSeconds(1))
-                .end(LocalDateTime.now().plusSeconds(1))
-                .build();
-
-        ResultActions resultActions = mockMvc.perform(post("/bookings")
-                .header(headerUserId, item.getOwner().getId())
-                .content(objectMapper.writeValueAsString(creationDto))
-                .characterEncoding(StandardCharsets.UTF_8)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON));
-
-        bookingStatusIsBedRequestCheck(resultActions);
-    }
-
-    @Test
     public void shouldThrownExceptionIfRequestHeaderDoesntExistsWhenCreateBooking() throws Exception {
         BookingCreationDto creationDto = BookingCreationDto.builder()
                 .itemId(1)
@@ -205,19 +187,6 @@ public class BookingControllerTest {
                 .accept(MediaType.APPLICATION_JSON));
 
         bookingStatusIsOkCheck(resultActions);
-    }
-
-    @Test
-    public void shouldGetUserBookings() throws Exception {
-        when(bookingService.getUserBookings(anyInt(), any(), anyInt(), anyInt())).thenReturn(List.of(booking));
-
-        ResultActions resultActions = mockMvc.perform(get("/bookings")
-                .header(headerUserId, item.getOwner().getId())
-                .characterEncoding(StandardCharsets.UTF_8)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON));
-
-        listOfBookingStatusIsOkCheck(resultActions);
     }
 
     @Test

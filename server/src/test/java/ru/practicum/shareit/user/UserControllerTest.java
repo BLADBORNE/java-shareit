@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -76,32 +75,6 @@ public class UserControllerTest {
     }
 
     @Test
-    public void shouldThrownExceptionWhenCreatedUserNameIsNotValid() throws Exception {
-        user.setName("");
-
-        ResultActions resultActions = mockMvc.perform(post("/users")
-                .content(objectMapper.writeValueAsString(user))
-                .characterEncoding(StandardCharsets.UTF_8)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON));
-
-        checkUserValidationException(resultActions);
-    }
-
-    @Test
-    public void shouldThrownExceptionWhenCreatedUserEmailIsNotValid() throws Exception {
-        user.setEmail("email");
-
-        ResultActions resultActions = mockMvc.perform(post("/users")
-                .content(objectMapper.writeValueAsString(user))
-                .characterEncoding(StandardCharsets.UTF_8)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON));
-
-        checkUserValidationException(resultActions);
-    }
-
-    @Test
     public void shouldUpdateUser() throws Exception {
         User updatedUser = User.builder()
                 .id(1)
@@ -123,23 +96,6 @@ public class UserControllerTest {
     }
 
     @Test
-    public void shouldThrownExceptionIfUpdatedEmailIsNotValid() throws Exception {
-        User updatedUser = User.builder()
-                .id(1)
-                .name("Maxim")
-                .email("email")
-                .build();
-
-        ResultActions resultActions = mockMvc.perform(patch("/users/{userId}", user.getId())
-                .content(objectMapper.writeValueAsString(updatedUser))
-                .characterEncoding(StandardCharsets.UTF_8)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON));
-
-        checkUserValidationException(resultActions);
-    }
-
-    @Test
     public void shouldThrownExceptionIfUpdatedEmailAlreadyExistsWhenUpdateUSer() throws Exception {
         User updatedUser = User.builder()
                 .id(1)
@@ -156,42 +112,6 @@ public class UserControllerTest {
                 .accept(MediaType.APPLICATION_JSON));
 
         checkUserAlreadyExistsException(resultActions);
-    }
-
-    @Test
-    public void shouldThrownThrowableWhenUpdatedUSer() throws Exception {
-        User updatedUser = User.builder()
-                .id(1)
-                .name("Maxim")
-                .email("iliasacool@gmail.com")
-                .build();
-
-        when(userService.updateUser(any(), anyInt())).thenThrow(DataIntegrityViolationException.class);
-
-        ResultActions resultActions = mockMvc.perform(patch("/users/{userId}", user.getId())
-                .content(objectMapper.writeValueAsString(updatedUser))
-                .characterEncoding(StandardCharsets.UTF_8)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON));
-
-        checkUserThrowable(resultActions);
-    }
-
-    @Test
-    public void shouldThrownExceptionIfUpdatedNamesNotValid() throws Exception {
-        User updatedUser = User.builder()
-                .id(1)
-                .name(" ")
-                .email("iliasacool@gmail.com")
-                .build();
-
-        ResultActions resultActions = mockMvc.perform(patch("/users/{userId}", user.getId())
-                .content(objectMapper.writeValueAsString(updatedUser))
-                .characterEncoding(StandardCharsets.UTF_8)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON));
-
-        checkUserValidationException(resultActions);
     }
 
     @Test
@@ -274,16 +194,6 @@ public class UserControllerTest {
     private void checkUserAlreadyExistsException(ResultActions request) throws Exception {
         request
                 .andExpect(status().is(409));
-    }
-
-    private void checkUserThrowable(ResultActions request) throws Exception {
-        request
-                .andExpect(status().is(500));
-    }
-
-    private void checkUserValidationException(ResultActions request) throws Exception {
-        request
-                .andExpect(status().is(400));
     }
 
     private void checkStatusIsOk(ResultActions request) throws Exception {

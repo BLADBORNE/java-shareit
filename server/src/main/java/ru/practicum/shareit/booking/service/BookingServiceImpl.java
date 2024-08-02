@@ -7,7 +7,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingCreationDto;
-import ru.practicum.shareit.booking.exception.*;
+import ru.practicum.shareit.booking.exception.ChangeStatusException;
+import ru.practicum.shareit.booking.exception.ItemUnavailableException;
+import ru.practicum.shareit.booking.exception.SelfReservationException;
+import ru.practicum.shareit.booking.exception.PermissionException;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
@@ -37,12 +40,6 @@ public class BookingServiceImpl implements BookingService {
                 booking.getItemId());
 
         User user = userService.getUserById(userId);
-
-        pastDateCheck(booking.getStart(), booking.getEnd());
-
-        endDateBeforeStartDateCheck(booking.getStart(), booking.getEnd());
-
-        ensDateIsEqualsStartDateCheck(booking.getStart(), booking.getEnd());
 
         Item item = itemService.getItemByIdForBookingAndComment(booking.getItemId());
 
@@ -113,7 +110,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<Booking> getUserBookings(int userId, String status, int from, int size) {
-        BookingStatus state = status == null ? BookingStatus.ALL : convertToBookingStatusCheck(status);
+        BookingStatus state = convertToBookingStatus(status);
 
         List<Booking> bookings;
 
@@ -165,7 +162,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<Booking> getOwnerBookings(int userId, String status, int from, int size) {
-        BookingStatus state = status == null ? BookingStatus.ALL : convertToBookingStatusCheck(status);
+        BookingStatus state = convertToBookingStatus(status);
 
         List<Booking> bookings;
 
@@ -215,29 +212,7 @@ public class BookingServiceImpl implements BookingService {
         return bookings;
     }
 
-    private void pastDateCheck(LocalDateTime start, LocalDateTime end) {
-        if (start.isBefore(LocalDateTime.now()) || end.isBefore(LocalDateTime.now())) {
-            throw new DateFromThePastException("Начало или конец бронирования не могут быть в прошлом");
-        }
-    }
-
-    private void endDateBeforeStartDateCheck(LocalDateTime start, LocalDateTime end) {
-        if (end.isBefore(start)) {
-            throw new EndDateIsBeforeStartDateException("Бронирование не может закончиться раньше, чем началось");
-        }
-    }
-
-    private void ensDateIsEqualsStartDateCheck(LocalDateTime start, LocalDateTime end) {
-        if (end.isEqual(start)) {
-            throw new EndDateIsEqualsStartDateException("Бронирование не может начаться и закончиться в одно и тоже время");
-        }
-    }
-
-    private BookingStatus convertToBookingStatusCheck(String status) {
-        try {
-            return BookingStatus.valueOf(status);
-        } catch (IllegalArgumentException e) {
-            throw new UnsupportedBookingStatusException("Unknown state: UNSUPPORTED_STATUS");
-        }
+    private BookingStatus convertToBookingStatus(String status) {
+        return BookingStatus.valueOf(status);
     }
 }

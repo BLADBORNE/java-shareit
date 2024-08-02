@@ -111,22 +111,6 @@ public class ItemRequestControllerTest {
     }
 
     @Test
-    public void shouldThrowExceptionIfCreatedItemRequestIsNotValid() throws Exception {
-        itemRequest.setDescription(null);
-
-        when(itemRequestService.addItemRequest(any(), anyInt())).thenThrow(NoSuchElementException.class);
-
-        ResultActions resultActions = mockMvc.perform(post("/requests")
-                .header(headerUserId, user.getId())
-                .content(objectMapper.writeValueAsString(itemRequest))
-                .characterEncoding(StandardCharsets.UTF_8)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON));
-
-        itemRequestBadRequestCheck(resultActions);
-    }
-
-    @Test
     public void shouldThrownServerError() throws Exception {
         when(itemRequestService.addItemRequest(any(), anyInt())).thenThrow(DataIntegrityViolationException.class);
 
@@ -159,34 +143,6 @@ public class ItemRequestControllerTest {
         when(itemRequestService.getUserItemRequests(anyInt())).thenThrow(NoSuchElementException.class);
 
         ResultActions resultActions = mockMvc.perform(get("/requests")
-                .header(headerUserId, user.getId())
-                .content(objectMapper.writeValueAsString(itemRequest))
-                .characterEncoding(StandardCharsets.UTF_8)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON));
-
-        itemRequestNotFoundCheck(resultActions);
-    }
-
-    @Test
-    public void shouldGetAllItemRequests() throws Exception {
-        when(itemRequestService.getAllItemRequests(anyInt(), anyInt(), anyInt())).thenReturn(List.of(itemRequest));
-
-        ResultActions resultActions = mockMvc.perform(get("/requests/all")
-                .header(headerUserId, user.getId())
-                .content(objectMapper.writeValueAsString(itemRequest))
-                .characterEncoding(StandardCharsets.UTF_8)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON));
-
-        itemRequestListOk(resultActions);
-    }
-
-    @Test
-    public void shouldThrownExceptionIfUserDoesntExistsWhenGetAllItemRequests() throws Exception {
-        when(itemRequestService.getAllItemRequests(anyInt(), anyInt(), anyInt())).thenThrow(NoSuchElementException.class);
-
-        ResultActions resultActions = mockMvc.perform(get("/requests/all")
                 .header(headerUserId, user.getId())
                 .content(objectMapper.writeValueAsString(itemRequest))
                 .characterEncoding(StandardCharsets.UTF_8)

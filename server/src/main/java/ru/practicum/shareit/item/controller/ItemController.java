@@ -3,7 +3,6 @@ package ru.practicum.shareit.item.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,15 +16,12 @@ import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.dto.CreationCommentDto;
 import ru.practicum.shareit.comment.mapper.CommentMapper;
 import ru.practicum.shareit.comment.service.CommentService;
-import ru.practicum.shareit.item.constraint.CreatedItem;
-import ru.practicum.shareit.item.constraint.UpdatedItem;
 import ru.practicum.shareit.item.dto.ItemCreationDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,15 +29,13 @@ import java.util.stream.Collectors;
 @RequestMapping("/items")
 @RequiredArgsConstructor
 @Slf4j
-@Validated
 public class ItemController {
     private final ItemService itemService;
     private final CommentService commentService;
 
-    @Validated(value = CreatedItem.class)
     @PostMapping
     public ItemDto createNewItem(@RequestHeader("X-Sharer-User-Id") Integer userId,
-                                 @Valid @RequestBody ItemCreationDto item
+                                 @RequestBody ItemCreationDto item
     ) {
         ItemDto createdItem = ItemMapper.toItemDto(itemService.createNewItem(item, userId));
 
@@ -50,11 +44,10 @@ public class ItemController {
         return ResponseEntity.ok().body(createdItem).getBody();
     }
 
-    @Validated(value = UpdatedItem.class)
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(
             @RequestHeader("X-Sharer-User-Id") Integer userId,
-            @Valid @RequestBody Item item,
+            @RequestBody Item item,
             @PathVariable(value = "itemId") Integer itemId
     ) {
         ItemDto updatedItem = ItemMapper.toItemDto(itemService.updateItem(item, itemId, userId));
@@ -99,7 +92,7 @@ public class ItemController {
     public CommentDto addCommentToItem(
             @RequestHeader("X-Sharer-User-Id") Integer userId,
             @PathVariable(value = "itemId") Integer itemId,
-            @Valid @RequestBody CreationCommentDto dto
+            @RequestBody CreationCommentDto dto
     ) {
         CommentDto comment = CommentMapper.toCommentDto(commentService.addCommentToItem(userId, itemId, dto));
 

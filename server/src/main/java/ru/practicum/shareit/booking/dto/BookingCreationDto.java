@@ -6,7 +6,6 @@ import lombok.Setter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Getter
@@ -15,10 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class BookingCreationDto {
-    @NotNull
     private Integer itemId;
-    @NotNull
     private LocalDateTime start;
-    @NotNull
     private LocalDateTime end;
 }

@@ -90,20 +90,6 @@ public class ItemControllerTest {
     }
 
     @Test
-    public void shouldThrownExceptionIfCreatedUserNameIsNotValid() throws Exception {
-        item.setName(" ");
-
-        ResultActions resultActions = mockMvc.perform(post("/items")
-                .header(headerUserId, user.getId())
-                .content(objectMapper.writeValueAsString(item))
-                .characterEncoding(StandardCharsets.UTF_8)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON));
-
-        checkFailedHeaderAndItemFieldsValidationAndBedRequest(resultActions);
-    }
-
-    @Test
     public void shouldThrownExceptionIfUserDoesntExistsWhenCreatedUser() throws Exception {
         when(itemService.createNewItem(any(), anyInt())).thenThrow(NoSuchElementException.class);
 
@@ -157,20 +143,6 @@ public class ItemControllerTest {
     @Test
     public void shouldThrownExceptionIfPermissionWasDeniedWhenUpdatedItem() throws Exception {
         when(itemService.updateItem(any(), anyInt(), anyInt())).thenThrow(PermissionException.class);
-
-        ResultActions resultActions = mockMvc.perform(patch("/items/{itemId}", item.getId())
-                .header(headerUserId, user.getId())
-                .content(objectMapper.writeValueAsString(item))
-                .characterEncoding(StandardCharsets.UTF_8)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON));
-
-        checkFailedHeaderAndItemFieldsValidationAndBedRequest(resultActions);
-    }
-
-    @Test
-    public void shouldThrownExceptionIfUpdatedItemDescriptionIsNotValid() throws Exception {
-        item.setDescription("");
 
         ResultActions resultActions = mockMvc.perform(patch("/items/{itemId}", item.getId())
                 .header(headerUserId, user.getId())
