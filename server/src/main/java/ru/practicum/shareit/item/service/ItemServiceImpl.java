@@ -111,7 +111,7 @@ public class ItemServiceImpl implements ItemService {
 
         userService.getUserById(userId);
 
-        return itemRepository.findByOwnerId(userId).stream().peek(item -> {
+        return itemRepository.findByOwnerIdOrderById(userId).stream().peek(item -> {
                     addItemBookingForItem(item, userId);
                     addCommentsToItem(item);
                 })

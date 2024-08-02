@@ -1,7 +1,6 @@
 package ru.practicum.shareit.request.controller;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -12,7 +11,7 @@ import java.util.NoSuchElementException;
 
 @RestControllerAdvice(value = "ru.practicum.shareit.request.controller")
 public class ItemRequestErrorController {
-    @ExceptionHandler({MethodArgumentNotValidException.class, MissingRequestHeaderException.class})
+    @ExceptionHandler(MissingRequestHeaderException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleException(final Exception e) {
         return new ErrorResponse(e.getMessage());

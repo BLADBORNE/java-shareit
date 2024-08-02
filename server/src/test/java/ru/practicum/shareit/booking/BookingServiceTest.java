@@ -146,41 +146,6 @@ public class BookingServiceTest {
     }
 
     @Test
-    public void shouldThrownExceptionIfCreatedDateFromThePast() {
-        BookingCreationDto creationDto = BookingCreationDto.builder()
-                .itemId(1)
-                .start(LocalDateTime.now())
-                .end(LocalDateTime.now().plusSeconds(1))
-                .build();
-
-        assertThrows(DateFromThePastException.class, () -> bookingService.addBooking(creationDto, anyInt()));
-    }
-
-    @Test
-    public void shouldThrownExceptionIfEndDateIsBeforeStartDate() {
-        BookingCreationDto creationDto = BookingCreationDto.builder()
-                .itemId(1)
-                .start(LocalDateTime.now().plusSeconds(2))
-                .end(LocalDateTime.now().plusSeconds(1))
-                .build();
-
-        assertThrows(EndDateIsBeforeStartDateException.class, () -> bookingService.addBooking(creationDto, anyInt()));
-    }
-
-    @Test
-    public void shouldThrownExceptionIfEndDateIsEqualsStartDate() {
-        LocalDateTime time = LocalDateTime.now().plusSeconds(1);
-
-        BookingCreationDto creationDto = BookingCreationDto.builder()
-                .itemId(1)
-                .start(time)
-                .end(time)
-                .build();
-
-        assertThrows(EndDateIsEqualsStartDateException.class, () -> bookingService.addBooking(creationDto, anyInt()));
-    }
-
-    @Test
     public void shouldApproveBooking() {
         booking.setStatus(BookingStatus.WAITING);
 
@@ -319,12 +284,6 @@ public class BookingServiceTest {
     }
 
     @Test
-    public void shouldThrownExceptionIfBookingStatusDoesntExistsWhenGetUserBookings() {
-        assertThrows(UnsupportedBookingStatusException.class, () -> bookingService.getUserBookings(1,
-                "UNSUPPORTED", 1, 1));
-    }
-
-    @Test
     public void shouldGetOwnerBookingsWithAllState() {
         when(bookingRepository.findByItemOwnerIdOrderByStartDesc(anyInt(), any()))
                 .thenReturn(new PageImpl<>(List.of(booking)));
@@ -384,12 +343,5 @@ public class BookingServiceTest {
 
         assertThrows(NoSuchElementException.class, () -> bookingService.getOwnerBookings(anyInt(),
                 BookingStatus.ALL.toString(), 1, 1));
-    }
-
-    @Test
-    public void shouldThrownExceptionIfBookingStatusDoesntExistsWhenGetOwnerBookings() {
-
-        assertThrows(UnsupportedBookingStatusException.class, () -> bookingService.getOwnerBookings(1,
-                "UNSUPPORTED", 1, 1));
     }
 }

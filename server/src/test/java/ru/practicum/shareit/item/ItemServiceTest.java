@@ -238,7 +238,7 @@ public class ItemServiceTest {
 
     @Test
     public void shouldGetUsersItems() {
-        when(itemRepository.findByOwnerId(anyInt())).thenReturn(List.of(item));
+        when(itemRepository.findByOwnerIdOrderById(anyInt())).thenReturn(List.of(item));
 
         List<Item> usersItems = itemService.getUsersItems(anyInt());
 

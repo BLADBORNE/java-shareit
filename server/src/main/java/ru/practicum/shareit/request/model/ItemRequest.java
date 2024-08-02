@@ -17,8 +17,6 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Column;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -33,14 +31,11 @@ public class ItemRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @NotBlank
     @Column(name = "description", nullable = false)
     private String description;
-    @NotNull
     @ManyToOne
     @JoinColumn(name = "requestor_id", nullable = false)
     private User requestor;
-    @NotNull
     @Column(name = "created", nullable = false)
     private LocalDateTime created;
     @Transient
