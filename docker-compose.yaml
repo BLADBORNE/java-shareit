@@ -10,11 +10,24 @@ services:
       - POSTGRES_DB=shareit
       - POSTGRES_USER=shareit_user
       - POSTGRES_PASSWORD=qwerty
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
+  gateway:
+    build: ./gateway
+    ports:
+      - "8080:8080"
+      - "8083:8083"
+    environment:
+      - SERVER_URL=http://server:8081
+  #      - "TZ=Europe/Moscow"
   server:
     build: ./server
     ports:
       - "8081:8081"
-      - "8084:8084"
+      - "9090:9090"
     depends_on:
       - db
     environment:
@@ -23,12 +36,4 @@ services:
       - DB_NAME=shareit
       - POSTGRES_USER=shareit_user
       - POSTGRES_PASSWORD=qwerty
-      - "TZ=Europe/Moscow"
-  gateway:
-    build: ./gateway
-    ports:
-      - "8080:8080"
-      - "8083:8083"
-    environment:
-      - SERVER_URL=http://server:8081
-      - "TZ=Europe/Moscow"
+#      - "TZ=Europe/Moscow"
