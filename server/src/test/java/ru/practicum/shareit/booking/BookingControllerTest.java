@@ -194,7 +194,7 @@ public class BookingControllerTest {
         when(bookingService.getOwnerBookings(anyInt(), any(), anyInt(), anyInt())).thenReturn(List.of(booking));
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("state", "someStateValue");
+        params.add("state", "ALL");
         params.add("from", "0");
         params.add("size", "10");
 

@@ -44,8 +44,6 @@ public class BookingController {
     @PostMapping
     public ResponseEntity<Object> bookItem(@RequestHeader("X-Sharer-User-Id") long userId,
                                            @Valid @RequestBody BookingCreationDto booking) {
-        pastDateCheck(booking.getStart(), booking.getEnd());
-
         endDateBeforeStartDateCheck(booking.getStart(), booking.getEnd());
 
         ensDateIsEqualsStartDateCheck(booking.getStart(), booking.getEnd());

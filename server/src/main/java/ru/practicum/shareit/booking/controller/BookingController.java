@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import ru.practicum.shareit.booking.dto.BookingCreationDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
+import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import java.util.List;
@@ -69,7 +70,7 @@ public class BookingController {
     @GetMapping
     public List<BookingDto> getUserBookings(
             @RequestHeader("X-Sharer-User-Id") Integer userId,
-            @RequestParam(value = "state") String status,
+            @RequestParam(value = "state") BookingStatus status,
             @RequestParam(value = "from") Integer from,
             @RequestParam(value = "size") Integer size
     ) {
@@ -84,7 +85,7 @@ public class BookingController {
     @GetMapping("/owner")
     public List<BookingDto> getOwnerBookings(
             @RequestHeader("X-Sharer-User-Id") Integer userId,
-            @RequestParam(value = "state") String status,
+            @RequestParam(value = "state") BookingStatus status,
             @RequestParam(value = "from") Integer from,
             @RequestParam(value = "size") Integer size
     ) {

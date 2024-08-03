@@ -225,7 +225,7 @@ public class BookingServiceTest {
         when(bookingRepository.findByBookerIdOrderByStartDesc(anyInt(), any()))
                 .thenReturn(new PageImpl<>(List.of(booking)));
 
-        List<Booking> bookings = bookingService.getUserBookings(1, BookingStatus.ALL.toString(), anyInt(),
+        List<Booking> bookings = bookingService.getUserBookings(1, BookingStatus.ALL, anyInt(),
                 1);
 
         assertThat(booking, is(bookings.get(0)));
@@ -236,7 +236,7 @@ public class BookingServiceTest {
         when(bookingRepository.findByBookerIdAndStartIsAfterOrderByStartDesc(anyInt(), any(), any()))
                 .thenReturn(new PageImpl<>(List.of(booking)));
 
-        List<Booking> bookings = bookingService.getUserBookings(1, BookingStatus.FUTURE.toString(), anyInt(),
+        List<Booking> bookings = bookingService.getUserBookings(1, BookingStatus.FUTURE, anyInt(),
                 1);
 
         assertThat(booking, is(bookings.get(0)));
@@ -247,7 +247,7 @@ public class BookingServiceTest {
         when(bookingRepository.findByBookerIdAndEndIsBeforeOrderByStartDesc(anyInt(), any(), any()))
                 .thenReturn(new PageImpl<>(List.of(booking)));
 
-        List<Booking> bookings = bookingService.getUserBookings(1, BookingStatus.PAST.toString(), anyInt(),
+        List<Booking> bookings = bookingService.getUserBookings(1, BookingStatus.PAST, anyInt(),
                 1);
 
         assertThat(booking, is(bookings.get(0)));
@@ -258,7 +258,7 @@ public class BookingServiceTest {
         when(bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(anyInt(), any(), any(),
                 any())).thenReturn(new PageImpl<>(List.of(booking)));
 
-        List<Booking> bookings = bookingService.getUserBookings(1, BookingStatus.CURRENT.toString(), anyInt(),
+        List<Booking> bookings = bookingService.getUserBookings(1, BookingStatus.CURRENT, anyInt(),
                 1);
 
         assertThat(booking, is(bookings.get(0)));
@@ -269,7 +269,7 @@ public class BookingServiceTest {
         when(bookingRepository.findByBookerIdAndStatusEqualsOrderByStartDesc(anyInt(), any(), any()))
                 .thenReturn(new PageImpl<>(List.of(booking)));
 
-        List<Booking> bookings = bookingService.getUserBookings(1, BookingStatus.REJECTED.toString(), anyInt(),
+        List<Booking> bookings = bookingService.getUserBookings(1, BookingStatus.REJECTED, anyInt(),
                 1);
 
         assertThat(booking, is(bookings.get(0)));
@@ -280,7 +280,7 @@ public class BookingServiceTest {
         when(userService.getUserById(anyInt())).thenThrow(NoSuchElementException.class);
 
         assertThrows(NoSuchElementException.class, () -> bookingService.getUserBookings(anyInt(),
-                BookingStatus.ALL.toString(), 1, 1));
+                BookingStatus.ALL, 1, 1));
     }
 
     @Test
@@ -288,7 +288,7 @@ public class BookingServiceTest {
         when(bookingRepository.findByItemOwnerIdOrderByStartDesc(anyInt(), any()))
                 .thenReturn(new PageImpl<>(List.of(booking)));
 
-        List<Booking> bookings = bookingService.getOwnerBookings(1, BookingStatus.ALL.toString(), anyInt(),
+        List<Booking> bookings = bookingService.getOwnerBookings(1, BookingStatus.ALL, anyInt(),
                 1);
 
         assertThat(booking, is(bookings.get(0)));
@@ -299,7 +299,7 @@ public class BookingServiceTest {
         when(bookingRepository.findByItemOwnerIdAndStartIsAfterOrderByStartDesc(anyInt(), any(), any()))
                 .thenReturn(new PageImpl<>(List.of(booking)));
 
-        List<Booking> bookings = bookingService.getOwnerBookings(1, BookingStatus.FUTURE.toString(), anyInt(),
+        List<Booking> bookings = bookingService.getOwnerBookings(1, BookingStatus.FUTURE, anyInt(),
                 1);
 
         assertThat(booking, is(bookings.get(0)));
@@ -310,7 +310,7 @@ public class BookingServiceTest {
         when(bookingRepository.findByItemOwnerIdAndEndIsBeforeOrderByStartDesc(anyInt(), any(), any()))
                 .thenReturn(new PageImpl<>(List.of(booking)));
 
-        List<Booking> bookings = bookingService.getOwnerBookings(1, BookingStatus.PAST.toString(), anyInt(),
+        List<Booking> bookings = bookingService.getOwnerBookings(1, BookingStatus.PAST, anyInt(),
                 1);
 
         assertThat(booking, is(bookings.get(0)));
@@ -321,7 +321,7 @@ public class BookingServiceTest {
         when(bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndIsAfterOrderByStartDesc(anyInt(), any(), any(),
                 any())).thenReturn(new PageImpl<>(List.of(booking)));
 
-        List<Booking> bookings = bookingService.getOwnerBookings(1, BookingStatus.CURRENT.toString(), anyInt(),
+        List<Booking> bookings = bookingService.getOwnerBookings(1, BookingStatus.CURRENT, anyInt(),
                 1);
 
         assertThat(booking, is(bookings.get(0)));
@@ -331,7 +331,7 @@ public class BookingServiceTest {
     public void shouldGetOwnerBookingsWithRejectedState() {
         when(bookingRepository.findByItemOwnerIdAndStatusEqualsOrderByStartDesc(anyInt(), any(), any())).thenReturn(new PageImpl<>(List.of(booking)));
 
-        List<Booking> bookings = bookingService.getOwnerBookings(1, BookingStatus.REJECTED.toString(), anyInt(),
+        List<Booking> bookings = bookingService.getOwnerBookings(1, BookingStatus.REJECTED, anyInt(),
                 1);
 
         assertThat(booking, is(bookings.get(0)));
@@ -342,6 +342,6 @@ public class BookingServiceTest {
         when(userService.getUserById(anyInt())).thenThrow(NoSuchElementException.class);
 
         assertThrows(NoSuchElementException.class, () -> bookingService.getOwnerBookings(anyInt(),
-                BookingStatus.ALL.toString(), 1, 1));
+                BookingStatus.ALL, 1, 1));
     }
 }

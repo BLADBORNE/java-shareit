@@ -109,14 +109,12 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getUserBookings(int userId, String status, int from, int size) {
-        BookingStatus state = convertToBookingStatus(status);
-
+    public List<Booking> getUserBookings(int userId, BookingStatus status, int from, int size) {
         List<Booking> bookings;
 
         Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size, sort);
 
-        switch (state) {
+        switch (status) {
             case ALL:
                 log.info("Получен запрос на отправку всех бронирований пользовтелю с id = {}", userId);
 
@@ -149,11 +147,11 @@ public class BookingServiceImpl implements BookingService {
                         LocalDateTime.now(), LocalDateTime.now(), pageable).toList();
                 break;
             default:
-                log.info("Получен запрос на отправку всех бронирований пользовтелю с id = {} с параметром {}", userId, state);
+                log.info("Получен запрос на отправку всех бронирований пользовтелю с id = {} с параметром {}", userId, status);
 
                 userService.getUserById(userId);
 
-                bookings = bookingRepository.findByBookerIdAndStatusEqualsOrderByStartDesc(userId, state, pageable)
+                bookings = bookingRepository.findByBookerIdAndStatusEqualsOrderByStartDesc(userId, status, pageable)
                         .toList();
         }
 
@@ -161,14 +159,12 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getOwnerBookings(int userId, String status, int from, int size) {
-        BookingStatus state = convertToBookingStatus(status);
-
+    public List<Booking> getOwnerBookings(int userId, BookingStatus status, int from, int size) {
         List<Booking> bookings;
 
         Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size, sort);
 
-        switch (state) {
+        switch (status) {
             case ALL:
                 log.info("Получен запрос на отправку всех бронирований создателю с id = {}", userId);
 
@@ -201,18 +197,14 @@ public class BookingServiceImpl implements BookingService {
                         LocalDateTime.now(), LocalDateTime.now(), pageable).toList();
                 break;
             default:
-                log.info("Получен запрос на отправку всех бронирований создателю с id = {} с параметром {}", userId, state);
+                log.info("Получен запрос на отправку всех бронирований создателю с id = {} с параметром {}", userId, status);
 
                 userService.getUserById(userId);
 
-                bookings = bookingRepository.findByItemOwnerIdAndStatusEqualsOrderByStartDesc(userId, state, pageable)
+                bookings = bookingRepository.findByItemOwnerIdAndStatusEqualsOrderByStartDesc(userId, status, pageable)
                         .toList();
         }
 
         return bookings;
-    }
-
-    private BookingStatus convertToBookingStatus(String status) {
-        return BookingStatus.valueOf(status);
     }
 }
