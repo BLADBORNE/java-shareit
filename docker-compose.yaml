@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+  db:
+    ports:
+      - "5434:5432"
+    image: postgres:13.7-alpine
+    volumes:
+      - /var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=shareit
+      - POSTGRES_USER=shareit_user
+      - POSTGRES_PASSWORD=qwerty
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
+  gateway:
+    build: ./gateway
+    ports:
+      - "8080:8080"
+      - "8083:8083"
+    depends_on:
+      - server
+    environment:
+      - SERVER_URL=http://server:8081
+  server:
+    build: ./server
+    ports:
+      - "8081:8081"
+      - "9090:9090"
+    depends_on:
+      - db
+    environment:
+      - HOST=db
+      - PORT=5432
+      - DB_NAME=shareit
+      - POSTGRES_USER=shareit_user
+      - POSTGRES_PASSWORD=qwerty
