@@ -129,7 +129,8 @@ public class ItemServiceImpl implements ItemService {
             return List.of();
         }
 
-        return itemRepository.getUsersItemsForSearch(search);
+        return itemRepository.findByAvailableIsTrueAndNameContainingIgnoreCaseOrAvailableIsTrueAndDescriptionContainingIgnoreCase(
+                search, search);
     }
 
     private Item itemContainsCheck(int itemId) {

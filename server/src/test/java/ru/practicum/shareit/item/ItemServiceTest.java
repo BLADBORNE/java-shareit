@@ -247,7 +247,8 @@ public class ItemServiceTest {
 
     @Test
     public void shouldGetItemsForSearch() {
-        when(itemRepository.getUsersItemsForSearch(anyString())).thenReturn(List.of(item));
+        when(itemRepository.findByAvailableIsTrueAndNameContainingIgnoreCaseOrAvailableIsTrueAndDescriptionContainingIgnoreCase(
+                anyString(), anyString())).thenReturn(List.of(item));
 
         List<Item> items = itemService.getItemsForSearch(anyInt(), "anyString()");
 
